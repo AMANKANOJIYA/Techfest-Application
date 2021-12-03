@@ -36,8 +36,13 @@ app.get('/profile', (req, res) => {
 })
 
 app.get('/logout', (req,res) => {
-    req.session.destroy();
-    res.redirect('/')
+    req.session.destroy((err) => {
+        if(err) {
+            return console.log(err);
+        }
+        res.redirect('/');
+    });
+    res.redirect('/login')
 })
 
 app.listen(process.env.PORT || 3000, () => {
