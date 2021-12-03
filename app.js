@@ -22,7 +22,7 @@ app.get('/',  (req, res)=> {
 });
 
 app.get('/login', (req, res)=> {
-  res.redirect(`https://microservice/appId=${appId}&sensitive=true`);
+  res.redirect(`${process.env.MIC_URL}/appId=${appId}&sensitive=true`);
 });
 
 app.post('/callback', (req, res) => {
@@ -32,7 +32,10 @@ app.post('/callback', (req, res) => {
 })
 
 app.get('/profile', (req, res) => {
-    res.render('profile')
+    if (req.session.user) {
+        res.render('profile')
+    }
+    res.redirect('/')
 })
 
 app.get('/logout', (req,res) => {
@@ -40,9 +43,9 @@ app.get('/logout', (req,res) => {
         if(err) {
             return console.log(err);
         }
-        res.redirect('/');
+        res.redirect('/profile');
     });
-    res.redirect('/login')
+    res.redirect('/')
 })
 
 app.listen(process.env.PORT || 3000, () => {
