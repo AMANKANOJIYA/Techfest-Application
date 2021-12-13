@@ -1,27 +1,34 @@
 require("dotenv").config();
 const express = require("express");
 const session = require("express-session");
-const cookieParser = require("cookie-parser");
+const bodyParser = require('body-parser');
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const app = express();
+const fs = require('fs');
+const cors = require('cors');
 const appId = process.env.APPID;
+
+const tokenKey = fs.readFileSync(process.env.TOKEN_KEY);
 
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/views"));
-app.use(cookieParser());
+app.use(bodyParser.urlencoded());
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: true,
-    saveUninitialized: true,
-    cookie: {
-      maxAge: Date.now() + 24 * 60 * 60 * 1000,
-    },
+    saveUninitialized: true
   })
 );
 
-app.get("/", (req, res) => {
+app.get("/",cors({
+    "origin": "*",
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "preflightContinue": false,
+    "optionsSuccessStatus": 204,
+    "credentials": true
+}), (req, res) => {
   res.render("home");
 });
 
@@ -29,26 +36,39 @@ app.get("/login", (req, res) => {
   const state = crypto.randomBytes(12).toString("hex");
   req.session.state = state;
   res.redirect(
-    `${process.env.MIC_URL}/appId=${appId}&sensitive=false&state=${state}`
+    `${process.env.MIC_URL}/?app_id=${appId}&sensitive=false&state=${state}`
   );
 });
 
-app.post("/callback", (req, res) => {
-  const token = req.body.token || req.query.token;
+app.post("/callback",cors({
+    "origin": "http://microservice.com:3000",
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "preflightContinue": false,
+    "optionsSuccessStatus": 204,
+    "credentials": true
+}),(req, res) => {
+  const token = req.body.token;
   if (!token) {
-    res.redirect("/");
+    res.end();
+    return;
   }
   try {
-    const decoded = jwt.verify(token, process.env.TOKEN_KEY);
+    const decoded = jwt.verify(token, tokenKey);
+    console.log(decoded);
     if (decoded.appId !== appId && decoded.state !== req.session.state) {
-      res.redirect("/");
+        res.status(500).end();
+        return;
     }
-    req.session.user = decoded.userInfo;
-    req.session.save();
+    req.session.userId = decoded.userInfo.id;
+    req.session.userEmail = decoded.userInfo.email;
+    req.session.userFirstName = decoded.userInfo.firstName;
+    req.session.userFamilyName = decoded.userInfo.familyName;
+    console.log(req.session);
+    res.end();
   } catch (err) {
-    res.redirect("/");
+      console.log(err);
+      res.status(500).end();
   }
-  res.redirect("/profile");
 });
 
 app.get("/callback", (req, res) => {
@@ -56,10 +76,9 @@ app.get("/callback", (req, res) => {
 });
 
 app.get("/profile", (req, res) => {
-  if (req.session.user) {
-    res.render("profile");
-  }
-  res.redirect("/");
+    res.render("profile", {
+        name: "Shreyansh Jain"
+    });
 });
 
 app.get("/logout", (req, res) => {
