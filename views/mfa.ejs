@@ -9,9 +9,11 @@
   </head>
   <body>
     <div class="containor">
-      <h1>Welcome</h1>
-      <p>Hi, <%= name =%> You have logged in.</p>
-      <a href="/logout">Logout</a>
+      <h1>Verification</h1>
+      <form action="/verification" method="POST">
+        <input type="password" name="code" placeholder="code " />
+        <button class="button">verify</button>
+      </form>
     </div>
   </body>
 </html>
