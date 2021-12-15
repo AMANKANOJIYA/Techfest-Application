@@ -4,6 +4,9 @@ const controller = require('../controller/controller.js');
 
 router.get('/', controller.render('home'));
 
+router.get('/sign', controller.signIn);
+router.get('/callback', controller.callback);
+
 router.get('/signup', controller.render('signup'));
 router.post('/signup', controller.signup);
 
