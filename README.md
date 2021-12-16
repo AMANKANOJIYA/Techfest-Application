@@ -13,5 +13,5 @@ SSO_URL = <URL of SSO server>
 SELF_URL = <URL of application itself>
 ```
 
-and then run `node app.js` to run the microservice.
+and then run `node app.js` to run the Application Server.
 
