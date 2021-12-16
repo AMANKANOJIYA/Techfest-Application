@@ -7,18 +7,7 @@ router.get('/', controller.render('home'));
 router.get('/sign', controller.signIn);
 router.get('/callback', controller.callback);
 
-router.get('/signup', controller.render('signup'));
-router.post('/signup', controller.signup);
-
-router.get('/login', controller.render('login'));
-router.post('/login', controller.login);
-
-router.get('/verification', controller.render('mfa'));
-router.post('/verification', controller.verification);
-
-router.get('/activate', controller.render('mfa'));
-router.post('/activate', controller.activate);
-
 router.get('/profile', controller.profile);
+router.get('/sensitive', controller.sensitive);
 
 module.exports = router;
